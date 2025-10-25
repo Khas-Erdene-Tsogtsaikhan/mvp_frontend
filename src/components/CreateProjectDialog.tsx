@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -23,8 +25,30 @@ export const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogP
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<Array<{ name: string; role: string }>>([]);
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberRole, setNewMemberRole] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const addTeamMember = () => {
+    if (!newMemberName || !newMemberRole) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both name and role",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTeamMembers([...teamMembers, { name: newMemberName, role: newMemberRole }]);
+    setNewMemberName("");
+    setNewMemberRole("");
+  };
+
+  const removeMember = (index: number) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== index));
+  };
 
   const handleCreate = async () => {
     if (!name || !description) {
@@ -83,14 +107,63 @@ export const CreateProjectDialog = ({ open, onOpenChange }: CreateProjectDialogP
             <Textarea
               id="description"
               placeholder="Describe what you want to build, key features, target users, and any specific requirements..."
-              className="min-h-[150px] resize-none"
+              className="min-h-[120px] resize-none"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={isGenerating}
             />
-            <p className="text-xs text-muted-foreground">
-              💡 The more detailed your description, the better AI can generate your roadmap
-            </p>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Team Members</Label>
+            
+            {teamMembers.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted rounded-lg">
+                {teamMembers.map((member, index) => (
+                  <Badge key={index} variant="secondary" className="px-3 py-1.5">
+                    {member.name} - {member.role}
+                    <button
+                      onClick={() => removeMember(index)}
+                      className="ml-2 hover:text-destructive"
+                      disabled={isGenerating}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                placeholder="Member name"
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                disabled={isGenerating}
+              />
+              <Select value={newMemberRole} onValueChange={setNewMemberRole} disabled={isGenerating}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Designer">Designer</SelectItem>
+                  <SelectItem value="Frontend">Frontend</SelectItem>
+                  <SelectItem value="Backend">Backend</SelectItem>
+                  <SelectItem value="QA">QA</SelectItem>
+                  <SelectItem value="PM">PM</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addTeamMember}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              Add Team Member
+            </Button>
           </div>
 
           {isGenerating && (

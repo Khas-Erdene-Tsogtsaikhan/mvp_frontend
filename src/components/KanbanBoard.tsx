@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle2, Circle, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle2, Circle, Clock, Filter } from "lucide-react";
 
 const columns = [
   {
@@ -69,9 +71,36 @@ const priorityColors = {
 };
 
 export const KanbanBoard = () => {
+  const [selectedMember, setSelectedMember] = useState<string>("all");
+  
+  const allMembers = ["Alice", "Bob", "Charlie", "Diana", "Eve"];
+  
+  const filteredColumns = columns.map(column => ({
+    ...column,
+    tasks: selectedMember === "all" 
+      ? column.tasks 
+      : column.tasks.filter(task => task.assignee.name === selectedMember)
+  }));
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {columns.map((column) => {
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Filter className="h-5 w-5 text-muted-foreground" />
+        <Select value={selectedMember} onValueChange={setSelectedMember}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filter by member" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Members</SelectItem>
+            {allMembers.map(member => (
+              <SelectItem key={member} value={member}>{member}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {filteredColumns.map((column) => {
         const Icon = column.icon;
         return (
           <div key={column.id} className="space-y-4">
@@ -113,6 +142,7 @@ export const KanbanBoard = () => {
           </div>
         );
       })}
+      </div>
     </div>
   );
 };

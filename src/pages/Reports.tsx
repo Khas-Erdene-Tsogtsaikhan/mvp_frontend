@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ReportDetailDialog } from "@/components/ReportDetailDialog";
 import { Sparkles, FileText, Users, Calendar } from "lucide-react";
 
 const reports = [
@@ -43,6 +45,8 @@ const reports = [
 ];
 
 const Reports = () => {
+  const [selectedReport, setSelectedReport] = useState<typeof reports[0] | null>(null);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -59,6 +63,7 @@ const Reports = () => {
               key={report.id}
               className="animate-fade-in hover:shadow-lg transition-all duration-300 cursor-pointer"
               style={{ animationDelay: `${index * 100}ms` }}
+              onClick={() => setSelectedReport(report)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
@@ -95,6 +100,12 @@ const Reports = () => {
           ))}
         </div>
       </main>
+
+      <ReportDetailDialog 
+        open={!!selectedReport}
+        onOpenChange={(open) => !open && setSelectedReport(null)}
+        report={selectedReport}
+      />
     </div>
   );
 };

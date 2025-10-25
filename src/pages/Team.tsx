@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mail, Calendar, CheckCircle2 } from "lucide-react";
+import { TeamMemberTasksDialog } from "@/components/TeamMemberTasksDialog";
+import { InviteMemberDialog } from "@/components/InviteMemberDialog";
+import { Mail, Calendar, CheckCircle2, UserPlus } from "lucide-react";
 
 const teamMembers = [
   {
@@ -13,6 +16,7 @@ const teamMembers = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alice",
     projects: 3,
     tasksCompleted: 24,
+    totalTasks: 30,
     joinDate: "2025-01-15",
   },
   {
@@ -22,6 +26,7 @@ const teamMembers = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=bob",
     projects: 4,
     tasksCompleted: 38,
+    totalTasks: 45,
     joinDate: "2024-11-20",
   },
   {
@@ -31,6 +36,7 @@ const teamMembers = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=charlie",
     projects: 2,
     tasksCompleted: 19,
+    totalTasks: 28,
     joinDate: "2025-02-01",
   },
   {
@@ -40,6 +46,7 @@ const teamMembers = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=diana",
     projects: 3,
     tasksCompleted: 31,
+    totalTasks: 40,
     joinDate: "2024-12-10",
   },
   {
@@ -49,6 +56,7 @@ const teamMembers = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=eve",
     projects: 5,
     tasksCompleted: 42,
+    totalTasks: 50,
     joinDate: "2024-10-05",
   },
 ];
@@ -61,14 +69,23 @@ const roleColors: Record<string, string> = {
 };
 
 const Team = () => {
+  const [selectedMember, setSelectedMember] = useState<typeof teamMembers[0] | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
       <main className="container mx-auto px-6 py-8">
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Team Members</h1>
-          <p className="text-muted-foreground">Manage your team and track their progress</p>
+        <div className="mb-8 animate-fade-in flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Team Members</h1>
+            <p className="text-muted-foreground">Manage your team and track their progress</p>
+          </div>
+          <Button onClick={() => setShowInvite(true)} className="bg-gradient-primary">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Invite Member
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -116,7 +133,11 @@ const Team = () => {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setSelectedMember(member)}
+                >
                   <CheckCircle2 className="mr-2 h-4 w-4" />
                   View Tasks
                 </Button>
@@ -125,6 +146,17 @@ const Team = () => {
           ))}
         </div>
       </main>
+
+      <TeamMemberTasksDialog 
+        open={!!selectedMember} 
+        onOpenChange={(open) => !open && setSelectedMember(null)}
+        member={selectedMember}
+      />
+
+      <InviteMemberDialog 
+        open={showInvite}
+        onOpenChange={setShowInvite}
+      />
     </div>
   );
 };
